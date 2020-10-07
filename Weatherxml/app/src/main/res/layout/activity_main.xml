@@ -76,7 +76,7 @@
 
     <TextView
         android:id="@+id/t20"
-        style="@style/myFont"
+        android:textSize="16sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="20:00"
@@ -115,7 +115,7 @@
 
     <TextView
         android:id="@+id/t16"
-        style="@style/myFont"
+        android:textSize="16sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="16:00"
@@ -142,7 +142,7 @@
 
     <TextView
         android:id="@+id/t00"
-        style="@style/myFont"
+        android:textSize="16sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="00:00"
@@ -156,7 +156,7 @@
 
     <TextView
         android:id="@+id/t12"
-        style="@style/myFont"
+        android:textSize="16sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="12:00"
@@ -261,7 +261,7 @@
 
     <TextView
         android:id="@+id/t04"
-        style="@style/myFont"
+        android:textSize="16sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="04:00"
@@ -275,7 +275,7 @@
 
     <TextView
         android:id="@+id/t08"
-        style="@style/myFont"
+        android:textSize="16sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
 
@@ -342,7 +342,7 @@
             style="@style/myFont"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="12"
+            android:layout_weight="16"
             android:text="Четверг"
             android:textColor="@color/white" />
 
@@ -390,7 +390,7 @@
             style="@style/myFont"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="12"
+            android:layout_weight="16"
             android:text="Пятница"
             android:textColor="@color/white" />
 
@@ -438,7 +438,7 @@
             style="@style/myFont"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="12"
+            android:layout_weight="16"
             android:text="Суббота"
             android:textColor="@color/white" />
 
@@ -486,7 +486,7 @@
             style="@style/myFont"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="12"
+            android:layout_weight="16"
             android:text="Четверг"
             android:textColor="@color/white" />
 
@@ -534,7 +534,7 @@
             style="@style/myFont"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="12"
+            android:layout_weight="16"
             android:text="Воскресенье"
             android:textColor="@color/white" />
 
@@ -582,7 +582,7 @@
             style="@style/myFont"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="12"
+            android:layout_weight="16"
             android:text="Понедельник"
             android:textColor="@color/white" />
 
@@ -619,6 +619,10 @@
         android:layout_width="75dp"
         android:layout_height="51dp"
         android:text=""
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintHorizontal_bias="0.900"
+        app:layout_constraintStart_toStartOf="@+id/downLine"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.099" />
 </androidx.constraintlayout.widget.ConstraintLayout>
