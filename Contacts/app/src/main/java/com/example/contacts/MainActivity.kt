@@ -20,6 +20,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.list_item.view.*
 import java.util.jar.Manifest
 
+
 //data class User(val firstName: String, val lastName: String)
 
 //val usersList = (0..30).map {
@@ -131,6 +132,10 @@ class MainActivity : AppCompatActivity() {
     private fun processReceivedPermission() {
         contactList.clear()
         contactList.addAll(fetchAllContacts())
+    }
+
+    fun showImageActivity() {
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
