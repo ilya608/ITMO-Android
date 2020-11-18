@@ -100,6 +100,7 @@ class MainActivity : AppCompatActivity() {
                 // grantResults пуст, если пользователь отменил диалог
                 // (но не согласился или отказался)
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    processReceivedPermission()
                 } else {
                     Toast.makeText(applicationContext, "Необходимо разрешение для просмотра контактов", Toast.LENGTH_SHORT).show()
                 }
@@ -132,29 +133,28 @@ class MainActivity : AppCompatActivity() {
     private fun processReceivedPermission() {
         contactList.clear()
         contactList.addAll(fetchAllContacts())
+        myRecyclerView.adapter?.notifyDataSetChanged()
     }
 
-    fun showImageActivity() {
-
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         val viewManager = LinearLayoutManager(this)
-
+        myRecyclerView.layoutManager = viewManager
         checkPermission()
-
+//        checkPermission()
         val contactAdapter = ContactAdapter(contactList) {
             val intent = Intent(Intent.ACTION_DIAL)
             intent.data = Uri.parse("tel:${it.phoneNumber}")
             startActivity(intent)
         }
-        myRecyclerView.apply {
-            layoutManager = viewManager
-            adapter = contactAdapter
-        }
+        myRecyclerView.adapter = contactAdapter
+//        myRecyclerView.apply {
+//            layoutManager = viewManager
+//            adapter = contactAdapter
+//        }
 
 
 //        val viewManager = LinearLayoutManager(this)
