@@ -52,7 +52,7 @@ class MyView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         super.onDraw(canvas)
         pic?.let { pic ->
             time = (time + speed) % 720
-            val picWidth = pic.intrinsicWidth
+                val picWidth = pic.intrinsicWidth
             val picHeight = pic.intrinsicHeight
             val diffWidth = width - picWidth
             val diffHeight = height - picHeight
@@ -60,9 +60,9 @@ class MyView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             val top = diffHeight / 2
             pic.setBounds(left, top, left + picWidth, top + picHeight)
             canvas?.let {canvas ->
-                canvas.save()
+                val saved = canvas.save()
                 drawFirst(canvas, left, top, picWidth, picHeight, pic)
-                canvas.restore()
+                canvas.restoreToCount(saved)
                 drawSecond(canvas, left, top, picWidth, picHeight, pic)
             }
 
