@@ -1,5 +1,6 @@
 package com.example.hw7
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -31,17 +32,10 @@ class MainActivity : AppCompatActivity() {
 //                          @field:Json(name = "name") val name: String)
 
     private var POST_KEY = "POST_KEY"
-    data class Post(
-        @SerializedName("title")
-        val title: String?,
-        @SerializedName("body")
-        val body: String?,
-        @SerializedName("userId")
-        val userId: Int?,
-        @SerializedName("id")
-        val id: Int?
-    ) : Serializable
 
+    companion object {
+        lateinit var retrofitService: RetrofitServices
+    }
 
     class PostAdapter(
         private var posts: MutableList<Post>,
@@ -57,7 +51,7 @@ class MainActivity : AppCompatActivity() {
                 onClick(posts[holder.adapterPosition])
             }
 
-            holder.root.delete.setOnClickListener()  {
+            holder.root.delete.setOnClickListener() {
                 posts.removeAt(holder.adapterPosition)
                 System.out.println("New size " + posts.size)
                 notifyDataSetChanged()
@@ -68,7 +62,7 @@ class MainActivity : AppCompatActivity() {
 
         override fun getItemCount() = posts.size
 
-        fun getPosts() : List<Post> {
+        fun getPosts(): List<Post> {
             return posts
         }
 
@@ -106,15 +100,16 @@ class MainActivity : AppCompatActivity() {
         postsList = savedInstanceState.get(POST_KEY) as ArrayList<Post>
     }
 
+    fun addNewPost() {
+
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         add_button.setOnClickListener() {
-            Toast.makeText(
-                this@MainActivity,
-                "Post published",
-                Toast.LENGTH_SHORT
-            ).show()
+            val intent = Intent(this, SendPost::class.java)
+            startActivity(intent)
         }
         val BASE_URL = "https://jsonplaceholder.typicode.com/"
         val viewManager = LinearLayoutManager(this)
@@ -124,16 +119,19 @@ class MainActivity : AppCompatActivity() {
             progress.visibility = View.INVISIBLE
             postAdapter.setPostsList(postsList)
         } else {
+//            # не создавать каждый раз
+//            # отправить запрос post
 
             val retrofit: Retrofit = Retrofit
                 .Builder()
                 .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
-
-            val retrofitService: RetrofitServices = retrofit.create(RetrofitServices::class.java)
+            retrofitService = retrofit.create(RetrofitServices::class.java)
+//            val retrofitService: RetrofitServices = retrofit.create(RetrofitServices::class.java)
 
             val list = retrofitService.getListPosts()
+
 
             list.enqueue(object : Callback<MutableList<Post>> {
                 override fun onFailure(call: Call<MutableList<Post>>?, t: Throwable?) {
