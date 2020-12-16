@@ -180,9 +180,6 @@ class MainActivity : AppCompatActivity() {
                 postsList = db.postDao()?.getAll() as ArrayList<Post>
             }, {
                 postAdapter.setPostsList(postsList)
-                if (postsList.size == 0) {
-                    RetrofitCall(this).execute()
-                }
             }).execute()
         }
         add_button.setOnClickListener() {
