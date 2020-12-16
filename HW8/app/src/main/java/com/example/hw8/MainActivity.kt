@@ -1,22 +1,22 @@
 package com.example.hw8
 
+import android.app.Activity
 import android.content.Intent
+import android.os.AsyncTask
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.list_item.view.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.lang.ref.WeakReference
 
 
 class MainActivity : AppCompatActivity() {
@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
         lateinit var db: AppDatabase
         var retrofitIsInit = false
         lateinit var retrofitService: RetrofitServices
-        lateinit var postAdapter : PostAdapter
+        lateinit var postAdapter: PostAdapter
         var maxKey: Number = 101
         var postsList: ArrayList<Post> = ArrayList<Post>()
     }
@@ -65,7 +65,7 @@ class MainActivity : AppCompatActivity() {
             return posts
         }
 
-        fun setPostsList(newPosts: MutableList<Post>) {
+        fun setPostsList(newPosts: ArrayList<Post>) {
             posts = newPosts
             notifyDataSetChanged()
         }
@@ -93,6 +93,44 @@ class MainActivity : AppCompatActivity() {
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
         postsList = savedInstanceState.get(POST_KEY) as ArrayList<Post>
+
+    }
+
+    class RetrofitCall(activity: Activity) : AsyncTask<Void, Void, ArrayList<Post>>() {
+        private var weakReference: WeakReference<Activity> = WeakReference(activity)
+        private var errorMessage: String = ""
+        override fun onPreExecute() {
+            weakReference.get()?.progress?.visibility = View.VISIBLE
+        }
+
+        override fun doInBackground(vararg params: Void?): ArrayList<Post>? {
+            db.postDao()?.deleteAll()
+            try {
+                val list = retrofitService.getListPosts().execute()
+//                for (i in 99 downTo 10) {
+//                    postsList.removeAt(i)
+//                }
+                val posts: ArrayList<Post> = list.body() as ArrayList<Post>
+                return posts
+            } catch (e: java.lang.Exception) {
+                errorMessage = "Internet error"
+            }
+            return null
+
+        }
+
+        override fun onPostExecute(result: ArrayList<Post>?) {
+            if (errorMessage.isNotEmpty()) {
+                Toast.makeText(weakReference.get(), errorMessage, Toast.LENGTH_SHORT).show()
+            }
+            result?.let { postAdapter.setPostsList(it) }
+            db.postDao()?.insertAll(postsList)
+            postsList = postAdapter.getPosts() as ArrayList<Post>
+            maxKey = postsList.size + 1
+            weakReference.get()?.progress?.visibility = View.INVISIBLE
+
+        }
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -115,52 +153,24 @@ class MainActivity : AppCompatActivity() {
         )
             .allowMainThreadQueries()
             .build()
-
-        add_button.setOnClickListener() {
-            val intent = Intent(this, SendPost::class.java)
-            startActivity(intent)
-        }
-
         val viewManager = LinearLayoutManager(this)
         postAdapter = PostAdapter(postsList) {}
-
-        refresh_button.setOnClickListener() {
-            progress.visibility = View.VISIBLE
-            db.postDao()?.deleteAll()
-            val list = retrofitService.getListPosts()
-            list.enqueue(object : Callback<MutableList<Post>> {
-                override fun onFailure(call: Call<MutableList<Post>>?, t: Throwable?) {
-                    Log.v("retrofit", "call failed")
-                    progress.visibility = View.INVISIBLE
-                }
-
-                override fun onResponse(
-                    call: Call<MutableList<Post>>?,
-                    response: Response<MutableList<Post>>?
-                ) {
-                    if (response != null) {
-                        response.body()?.let {
-                            progress.visibility = View.INVISIBLE
-                            postAdapter.setPostsList(it)
-                            postsList = postAdapter.getPosts() as ArrayList<Post>
-                            maxKey = postsList.size + 1
-
-                            for (i in 99 downTo 10) {
-                                postsList.removeAt(i)
-                            }
-                            db.postDao()?.insertAll(postsList)
-                        }
-                    }
-                }
-            })
-        }
         if (savedInstanceState != null) {
             postsList = savedInstanceState.get(POST_KEY) as ArrayList<Post>
             progress.visibility = View.INVISIBLE
             postAdapter.setPostsList(postsList)
         } else {
+            RetrofitCall(this).execute()
             postsList = db.postDao()?.getAll() as ArrayList<Post>
             postAdapter.setPostsList(postsList)
+        }
+        add_button.setOnClickListener() {
+            val intent = Intent(this, SendPost::class.java)
+            startActivity(intent)
+        }
+
+        refresh_button.setOnClickListener() {
+            RetrofitCall(this).execute()
         }
         myRecyclerView.apply {
             layoutManager = viewManager
