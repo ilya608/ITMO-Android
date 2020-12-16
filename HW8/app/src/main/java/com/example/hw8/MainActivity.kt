@@ -49,10 +49,13 @@ class MainActivity : AppCompatActivity() {
             }
 
             holder.root.delete.setOnClickListener() {
-                db.postDao()?.delete(posts[holder.adapterPosition])
-                posts.removeAt(holder.adapterPosition)
-                System.out.println("New size " + posts.size)
-                notifyDataSetChanged()
+                RunAsync({
+                    db.postDao()?.delete(posts[holder.adapterPosition])
+                }, {
+                    posts.removeAt(holder.adapterPosition)
+                    System.out.println("New size " + posts.size)
+                    notifyDataSetChanged()
+                }).execute()
 
 
             }
@@ -96,6 +99,19 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    class RunAsync(val handler: () -> Unit, val postExecuteHandler: () -> Unit) :
+        AsyncTask<Void, Void, Void>() {
+        override fun doInBackground(vararg params: Void?): Void? {
+            handler()
+            return null
+        }
+
+        override fun onPostExecute(result: Void?) {
+            super.onPostExecute(result)
+            postExecuteHandler()
+        }
+    }
+
     class RetrofitCall(activity: Activity) : AsyncTask<Void, Void, ArrayList<Post>>() {
         private var weakReference: WeakReference<Activity> = WeakReference(activity)
         private var errorMessage: String = ""
@@ -111,6 +127,7 @@ class MainActivity : AppCompatActivity() {
 //                    postsList.removeAt(i)
 //                }
                 val posts: ArrayList<Post> = list.body() as ArrayList<Post>
+                db.postDao()?.insertAll(posts)
                 return posts
             } catch (e: java.lang.Exception) {
                 errorMessage = "Internet error"
@@ -124,7 +141,6 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(weakReference.get(), errorMessage, Toast.LENGTH_SHORT).show()
             }
             result?.let { postAdapter.setPostsList(it) }
-            db.postDao()?.insertAll(postsList)
             postsList = postAdapter.getPosts() as ArrayList<Post>
             maxKey = postsList.size + 1
             weakReference.get()?.progress?.visibility = View.INVISIBLE
@@ -160,9 +176,14 @@ class MainActivity : AppCompatActivity() {
             progress.visibility = View.INVISIBLE
             postAdapter.setPostsList(postsList)
         } else {
-            RetrofitCall(this).execute()
-            postsList = db.postDao()?.getAll() as ArrayList<Post>
-            postAdapter.setPostsList(postsList)
+            RunAsync({
+                postsList = db.postDao()?.getAll() as ArrayList<Post>
+            }, {
+                postAdapter.setPostsList(postsList)
+                if (postsList.size == 0) {
+                    RetrofitCall(this).execute()
+                }
+            }).execute()
         }
         add_button.setOnClickListener() {
             val intent = Intent(this, SendPost::class.java)
