@@ -25,6 +25,7 @@ class MainActivity : AppCompatActivity() {
     val BASE_URL = "https://jsonplaceholder.typicode.com/"
 
     companion object {
+        var myAsyncTasks: ArrayList<AsyncTask<Void, Void, Void>> = ArrayList()
         lateinit var db: AppDatabase
         var retrofitIsInit = false
         lateinit var retrofitService: RetrofitServices
@@ -49,13 +50,16 @@ class MainActivity : AppCompatActivity() {
             }
 
             holder.root.delete.setOnClickListener() {
-                RunAsync({
-                    db.postDao()?.delete(posts[holder.adapterPosition])
-                }, {
-                    posts.removeAt(holder.adapterPosition)
-                    System.out.println("New size " + posts.size)
-                    notifyDataSetChanged()
-                }).execute()
+                val task =
+                    RunAsync({
+                        db.postDao()?.delete(posts[holder.adapterPosition])
+                    }, {
+                        posts.removeAt(holder.adapterPosition)
+                        System.out.println("New size " + posts.size)
+                        notifyDataSetChanged()
+                    })
+                myAsyncTasks.add(task)
+                task.execute()
 
 
             }
@@ -176,11 +180,14 @@ class MainActivity : AppCompatActivity() {
             progress.visibility = View.INVISIBLE
             postAdapter.setPostsList(postsList)
         } else {
+            val task =
             RunAsync({
                 postsList = db.postDao()?.getAll() as ArrayList<Post>
             }, {
                 postAdapter.setPostsList(postsList)
-            }).execute()
+            })
+            myAsyncTasks.add(task)
+            task.execute()
         }
         add_button.setOnClickListener() {
             val intent = Intent(this, SendPost::class.java)
@@ -194,5 +201,15 @@ class MainActivity : AppCompatActivity() {
             layoutManager = viewManager
             adapter = postAdapter
         }
+    }
+
+    override fun onDestroy() {
+        for (task in myAsyncTasks) {
+            if (task.status == AsyncTask.Status.RUNNING) {
+                task.cancel(true)
+            }
+        }
+        myAsyncTasks.clear()
+        super.onDestroy()
     }
 }

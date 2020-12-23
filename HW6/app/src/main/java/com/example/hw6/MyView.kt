@@ -1,5 +1,6 @@
 package com.example.hw6
 
+
 import android.content.Context
 import android.graphics.Canvas
 import android.util.AttributeSet
@@ -10,7 +11,6 @@ import androidx.core.content.ContextCompat
 import android.graphics.drawable.Drawable
 import android.content.res.TypedArray
 import kotlin.math.abs
-
 
 class MyView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private val pic = ContextCompat.getDrawable(context, R.drawable.my_view)
@@ -52,14 +52,14 @@ class MyView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         super.onDraw(canvas)
         pic?.let { pic ->
             time = (time + speed) % 720
-                val picWidth = pic.intrinsicWidth
+            val picWidth = pic.intrinsicWidth
             val picHeight = pic.intrinsicHeight
             val diffWidth = width - picWidth
             val diffHeight = height - picHeight
             val left = diffWidth / 2
             val top = diffHeight / 2
             pic.setBounds(left, top, left + picWidth, top + picHeight)
-            canvas?.let {canvas ->
+            canvas?.let { canvas ->
                 val saved = canvas.save()
                 drawFirst(canvas, left, top, picWidth, picHeight, pic)
                 canvas.restoreToCount(saved)
@@ -110,4 +110,5 @@ class MyView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         pic.draw(canvas)
     }
 }
+
 
